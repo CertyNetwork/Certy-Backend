@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+
+  mysql:
+    image: mariadb:10.2.37
+    container_name: mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=certy
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=12345678
+    command: --default-authentication-plugin=mysql_native_password
+    ports:
+      - 4406:3306
+  redis:
+    image: redis:6.2-alpine
+    ports:
+      - 7379:6379
+
+volumes:
+  data:
+    driver: local

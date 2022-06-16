@@ -1,0 +1,7 @@
+const CACHE_CONSTANT = {
+  CACHE_CLIENT_TIME: 60 * 60 * 24,
+  PREFIX_CACHE_CLIENT: 'client-',
+  PREFIX_CACHE_ACCESS_TOKEN: 'log-out-',
+  CACHE_TWO_FACTOR_TIME: 60 * 60 * 24,
+};
+export default CACHE_CONSTANT;
