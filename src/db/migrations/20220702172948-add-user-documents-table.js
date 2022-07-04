@@ -2,7 +2,7 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('user_verifications', {
+    await queryInterface.createTable('user_documents', {
       id: {
         type: Sequelize.INTEGER.UNSIGNED,
         autoIncrement: true,
@@ -13,30 +13,16 @@ module.exports = {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
       },
-      ref: {
+      document_type: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
       },
-      token: {
+      metadata: {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      status: {
+      document_uri: {
         type: Sequelize.STRING,
-        allowNull: false,
-      },
-      provider: {
-        type: Sequelize.STRING, 
-        allowNull: false,
-        defaultValue: 'vouched-id'
-      },
-      meta_data: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      meta_data: {
-        type: Sequelize.TEXT,
         allowNull: true,
       },
       created_at: {
@@ -48,11 +34,19 @@ module.exports = {
         allowNull: true,
       },
     });
-    await queryInterface.addIndex('user_verifications', ['user_id']);
-    await queryInterface.addIndex('user_verifications', ['ref']);
+    await queryInterface.addConstraint('user_documents', {
+      fields: ['user_id'],
+      type: 'FOREIGN KEY',
+      name: 'user_id_fk',
+      references: {
+        table: 'users',
+        field: 'id',
+      },
+    });
+    await queryInterface.addIndex('user_documents', ['document_type']);
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('user_verifications');
+    await queryInterface.dropTable('user_documents');
   }
 };

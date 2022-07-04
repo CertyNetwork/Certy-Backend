@@ -12,10 +12,10 @@ import {
 } from 'sequelize-typescript';
 
 @Table({
-  tableName: 'user_profiles',
+  tableName: 'organization_profiles',
   underscored: true,
 })
-export class UserProfile extends Model {
+export class OrganizationProfile extends Model {
   @Column({ field: 'user_id', primaryKey: true })
   userId: bigint;
 
@@ -29,33 +29,17 @@ export class UserProfile extends Model {
   @Column({ type: DataType.STRING, field: 'about'})
   about: string;
 
-  @Column({ type: DataType.STRING, field: 'skills'})
-  skills: string;
-
-  @Column({
-    type: DataType.STRING,
-    field: 'mobile_number',
-    unique: true
-  })
-  mobileNumber: string;
-
-  @Column({ type: DataType.BOOLEAN, field: 'mobile_verified'})
-  mobileVerified: boolean;
-
-  @Column({ type: DataType.STRING, field: 'display_name' })
-  displayName: string;
-
   @Column({ type: DataType.STRING, field: 'location' })
   location: string;
 
-  @Column({ type: DataType.STRING, field: 'bio' })
-  bio: string;
+  @Column({ type: DataType.STRING, field: 'organization_type' })
+  organizationType: string;
 
-  @Column({ type: DataType.STRING, field: 'linkedIn_link' })
-  linkedInLink: string;
+  @Column({ type: DataType.STRING, field: 'working_hours' })
+  workingHours: string;
 
-  @Column({ type: DataType.STRING, field: 'github_link' })
-  githubLink: string;
+  @Column({ type: DataType.STRING, field: 'organization_size' })
+  organizationSize: string;
 
   @CreatedAt
   @Column({ type: DataType.BIGINT, field: 'created_at' })
@@ -66,13 +50,13 @@ export class UserProfile extends Model {
   updatedAt: number;
 
   @BeforeCreate
-  static updateTimeWhenCreated(instance: UserProfile) {
+  static updateTimeWhenCreated(instance: OrganizationProfile) {
     instance.createdAt = Math.floor(Date.now());
     instance.updatedAt = Math.floor(Date.now());
   }
 
   @BeforeUpdate
-  static updateTimeWhenUpdated(instance: UserProfile) {
+  static updateTimeWhenUpdated(instance: OrganizationProfile) {
     instance.setDataValue('updatedAt', Math.floor(Date.now()));
   }
 

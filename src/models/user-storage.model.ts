@@ -13,20 +13,26 @@ import {
 } from 'sequelize-typescript';
 
 @Table({
-  tableName: 'users',
+  tableName: 'user_storage',
   underscored: true,
 })
-export class User extends Model {
-  id: number;
+export class UserStorage extends Model {
+  id: bigint;
 
-  @Column({ type: DataType.STRING, field: 'nonce', unique: true })
-  nonce: string;
+  @Column({ type: DataType.INTEGER, field: 'user_id' })
+  userId: string;
 
-  @Column({ type: DataType.STRING, field: 'address',  unique: true })
-  address: string;
+  @Column({ type: DataType.STRING, field: 'root_cid' })
+  rootCid: string;
 
-  @Column({ type: DataType.ENUM('individual', 'institution'), field: 'user_type'})
-  userType: 'individual' | 'institution';
+  @Column({ type: DataType.STRING, field: 'files' })
+  files: string;
+
+  @Column({ type: DataType.STRING, field: 'provider', defaultValue: 'web3-storage' })
+  provider: string;
+
+  @Column({ type: DataType.STRING, field: 'meta_data' })
+  metaData: string;
 
   @CreatedAt
   @Column({ type: DataType.BIGINT, field: 'created_at' })
@@ -37,20 +43,19 @@ export class User extends Model {
   updatedAt: number;
 
   @BeforeCreate
-  static updateTimeWhenCreated(instance: User) {
+  static updateTimeWhenCreated(instance: UserStorage) {
     instance.createdAt = Math.floor(Date.now());
     instance.updatedAt = Math.floor(Date.now());
-    instance.nonce = uuidv4();
   }
 
   @BeforeUpdate
-  static updateTimeWhenUpdated(instance: User) {
+  static updateTimeWhenUpdated(instance: UserStorage) {
     instance.setDataValue('updatedAt', Math.floor(Date.now()));
   }
 
   @BeforeBulkUpdate
   @BeforeBulkCreate
-  static updateTimeWhenBulk(instance) {
+  static updateTimeWhenBulk(instance: any) {
     instance.attributes.updatedAt = Math.floor(Date.now());
   }
 }

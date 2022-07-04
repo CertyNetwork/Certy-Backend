@@ -2,8 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CommandBus } from '@nestjs/cqrs';
 import { InjectModel } from '@nestjs/sequelize';
 import { Sequelize } from 'sequelize-typescript';
-import { CertyError } from 'src/errors/cerrty.error';
-import { UserVerification } from 'src/models/user-verification.model';
+import { CertyError } from 'errors/certy.error';
+import { UserVerification } from 'models/user-verification.model';
 
 @Injectable()
 export class KycService {

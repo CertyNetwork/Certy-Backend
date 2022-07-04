@@ -9,7 +9,7 @@ import {
 import { AuthService } from './auth.service';
 import { Reflector } from '@nestjs/core';
 import { AuthCacheService } from '../cache-management/auth-cache.service';
-import { IS_PUBLIC_KEY } from 'src/decorators/public.decorator';
+import { IS_PUBLIC_KEY } from 'decorators/public.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {

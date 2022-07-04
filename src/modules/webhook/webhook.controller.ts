@@ -1,6 +1,6 @@
 import { Post, Body, Controller } from '@nestjs/common';
 import { ApiExcludeController } from '@nestjs/swagger';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from 'decorators/public.decorator';
 import { WebhookService } from './webhook.service';
 
 @Public()

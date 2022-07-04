@@ -8,6 +8,7 @@ import {
   Trim,
 } from './transform.decorators';
 import {
+  IsDateString,
   IsInt,
   IsNotEmpty,
   IsNumber,
@@ -39,7 +40,9 @@ interface INumberFieldOptions {
 export function NumberField(
   options: Omit<ApiPropertyOptions, 'type'> & INumberFieldOptions = {},
 ): PropertyDecorator {
-  const decorators = [Type(() => Number)];
+  const decorators = [
+    Type(() => Number),
+  ];
 
   const { each, int, minimum, maximum, isPositive, swagger } = options;
 
@@ -101,6 +104,22 @@ export function StringField(
 
   if (options?.toUpperCase) {
     decorators.push(ToUpperCase());
+  }
+
+  return applyDecorators(...decorators);
+}
+
+export function DateField(
+  options: Omit<ApiPropertyOptions, 'type'> & IStringFieldOptions = {},
+): PropertyDecorator {
+  const decorators = [
+    IsNotEmpty({ message: 'validation.NOT_EMPTY' }),
+    IsDateString({ strict: true }, { message: 'validation.INVALID_DATE' }),
+    Trim(),
+  ];
+
+  if (options?.swagger !== false) {
+    decorators.push(ApiProperty({ type: Date, ...options }));
   }
 
   return applyDecorators(...decorators);

@@ -3,9 +3,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/sequelize';
 import { lastValueFrom } from 'rxjs';
-import { UserProfile } from 'src/models/user-profile.model';
-import { UserVerification } from 'src/models/user-verification.model';
-import vouchedConfig from 'src/config/vouched.config';
+import { UserProfile } from 'models/user-profile.model';
+import { UserVerification } from 'models/user-verification.model';
+import vouchedConfig from 'config/vouched.config';
 
 @Injectable()
 export class TasksService {
@@ -21,7 +21,7 @@ export class TasksService {
     
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_11_HOURS)
   async handleCron() {
     const completedJobs = await this.userVerificationModel.findAll({
       where: {

@@ -9,6 +9,7 @@ import { AppModule } from './app.module';
 import firebaseConfig from './config/firebase.config';
 import { HttpExceptionFilter } from './filters/http-exception.filter';
 import { TransformResponseInterceptor } from './interceptors/transform-response.interceptor';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -44,11 +45,21 @@ async function bootstrap() {
     }),
   );
 
+  app.useGlobalPipes(
+    new ValidationPipe({
+      disableErrorMessages: false,
+      whitelist: true,
+      transform: true,
+      stopAtFirstError: true,
+    }),
+  );
+
   // Firebase setup
   const adminConfig: ServiceAccount = firebaseConfig;
   adminConfig.privateKey = adminConfig.privateKey.replace(/\\n/g, '\n');
   admin.initializeApp({
     credential: admin.credential.cert(adminConfig),
+    storageBucket: "certify-502fb.appspot.com",
   });
 
   // Swagger setup

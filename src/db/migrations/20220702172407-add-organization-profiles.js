@@ -2,7 +2,7 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('user_profiles', {
+    await queryInterface.createTable('organization_profiles', {
       user_id: {
         type: Sequelize.INTEGER.UNSIGNED,
         autoIncrement: false,
@@ -18,37 +18,19 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      skills: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      mobile_number: {
-        type: Sequelize.STRING,
-        allowNull: true,
-        unique: true,
-      },
-      mobile_verified: {
-        type: Sequelize.BOOLEAN,
-        allowNull: true,
-        defaultValue: false,
-      },
-      display_name: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
       location: {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      bio: {
-        type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      linkedIn_link: {
+      organization_type: {
         type: Sequelize.STRING,
         allowNull: true,
       },
-      github_link: {
+      working_hours: {
+        type: Sequelize.STRING,
+        allowNull: true,
+      },
+      organization_size: {
         type: Sequelize.STRING,
         allowNull: true,
       },
@@ -64,6 +46,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('user_profiles');
+    await queryInterface.dropTable('organization_profiles');
   }
 };

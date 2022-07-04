@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { JobModule } from './modules/jobs/job.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthGuard } from './modules/auth/auth.guard';
@@ -11,9 +12,15 @@ import { CronjobModule } from './modules/cron-job/cron-job.module';
 import { KycModule } from './modules/kyc/kyc.module';
 import { QueueModule } from './modules/queue-management/queue.module';
 import { UserModule } from './modules/user/user.module';
+import { Web3StorageModule } from './modules/web3.storage/web3.storage.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
+import { ProfileModule } from './modules/profile/profile.module';
 
-const APP_MODULES = [AuthModule, UserModule, KycModule, QueueModule, WebhookModule, CronjobModule];
+const APP_MODULES = [
+  AuthModule, UserModule, KycModule, Web3StorageModule,
+  QueueModule, WebhookModule, CronjobModule, JobModule,
+  ProfileModule
+];
 
 @Module({
   imports: [

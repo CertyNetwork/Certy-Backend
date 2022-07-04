@@ -4,7 +4,7 @@ import { JwtService, JwtVerifyOptions } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/sequelize';
 import { providers, utils } from 'near-api-js';
 import { v4 as uuidv4 } from 'uuid';
-import { CertyError } from 'src/errors/cerrty.error';
+import { CertyError } from 'errors/certy.error';
 import { User } from '../../models/user.model';
 import { LoginDto } from './dto/login.dto';
 import { AccountView } from 'near-api-js/lib/providers/provider';

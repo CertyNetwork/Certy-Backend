@@ -2,7 +2,7 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('user_verifications', {
+    await queryInterface.createTable('user_storage', {
       id: {
         type: Sequelize.INTEGER.UNSIGNED,
         autoIncrement: true,
@@ -13,30 +13,21 @@ module.exports = {
         type: Sequelize.INTEGER.UNSIGNED,
         allowNull: false,
       },
-      ref: {
+      root_cid: {
         type: Sequelize.STRING,
         allowNull: false,
         unique: true,
       },
-      token: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      status: {
+      files: {
         type: Sequelize.STRING,
         allowNull: false,
       },
       provider: {
         type: Sequelize.STRING, 
-        allowNull: false,
-        defaultValue: 'vouched-id'
-      },
-      meta_data: {
-        type: Sequelize.TEXT,
         allowNull: true,
       },
       meta_data: {
-        type: Sequelize.TEXT,
+        type: Sequelize.STRING,
         allowNull: true,
       },
       created_at: {
@@ -48,11 +39,11 @@ module.exports = {
         allowNull: true,
       },
     });
-    await queryInterface.addIndex('user_verifications', ['user_id']);
-    await queryInterface.addIndex('user_verifications', ['ref']);
+    await queryInterface.addIndex('user_storage', ['user_id']);
+    await queryInterface.addIndex('user_storage', ['root_cid']);
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('user_verifications');
+    await queryInterface.dropTable('user_storage');
   }
 };

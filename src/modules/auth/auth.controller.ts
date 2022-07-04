@@ -4,7 +4,7 @@ import { ApiResponse } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto, RefreshTokenDto } from './dto/login.dto';
 import ResHelper from '../../helpers/response.helper';
-import { Public } from 'src/decorators/public.decorator';
+import { Public } from 'decorators/public.decorator';
 
 @ApiController('auth')
 export class AuthController {

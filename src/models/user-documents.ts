@@ -1,4 +1,3 @@
-import { v4 as uuidv4 } from 'uuid';
 import {
   Column,
   Model,
@@ -13,20 +12,23 @@ import {
 } from 'sequelize-typescript';
 
 @Table({
-  tableName: 'users',
+  tableName: 'user_documents',
   underscored: true,
 })
-export class User extends Model {
-  id: number;
+export class UserDocument extends Model {
+  id: bigint;
 
-  @Column({ type: DataType.STRING, field: 'nonce', unique: true })
-  nonce: string;
+  @Column({ type: DataType.INTEGER, field: 'user_id' })
+  userId: string;
 
-  @Column({ type: DataType.STRING, field: 'address',  unique: true })
-  address: string;
+  @Column({ type: DataType.STRING, field: 'document_type' })
+  documentType: string;
 
-  @Column({ type: DataType.ENUM('individual', 'institution'), field: 'user_type'})
-  userType: 'individual' | 'institution';
+  @Column({ type: DataType.STRING, field: 'metadata' })
+  metadata: string;
+
+  @Column({ type: DataType.STRING, field: 'document_uri' })
+  documentUri: string;
 
   @CreatedAt
   @Column({ type: DataType.BIGINT, field: 'created_at' })
@@ -37,20 +39,19 @@ export class User extends Model {
   updatedAt: number;
 
   @BeforeCreate
-  static updateTimeWhenCreated(instance: User) {
+  static updateTimeWhenCreated(instance: UserDocument) {
     instance.createdAt = Math.floor(Date.now());
     instance.updatedAt = Math.floor(Date.now());
-    instance.nonce = uuidv4();
   }
 
   @BeforeUpdate
-  static updateTimeWhenUpdated(instance: User) {
+  static updateTimeWhenUpdated(instance: UserDocument) {
     instance.setDataValue('updatedAt', Math.floor(Date.now()));
   }
 
   @BeforeBulkUpdate
   @BeforeBulkCreate
-  static updateTimeWhenBulk(instance) {
+  static updateTimeWhenBulk(instance: any) {
     instance.attributes.updatedAt = Math.floor(Date.now());
   }
 }
