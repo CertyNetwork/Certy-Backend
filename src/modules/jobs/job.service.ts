@@ -6,6 +6,7 @@ import { CertyError } from 'errors/certy.error';
 import { ApplyJobDto, UpdateApplicantStatusDto } from './dto/job.dto';
 import { Applicant } from 'models/applicant.model';
 import { User } from 'models/user.model';
+import { getStorage } from 'firebase-admin/storage';
 
 @Injectable()
 export class JobService {
@@ -19,7 +20,7 @@ export class JobService {
 
   }
 
-  async applyForJob(userId: number, payload: ApplyJobDto) {
+  async applyForJob(userId: number, files: Array<Express.Multer.File>, payload: ApplyJobDto) {
     const existingApplicant = await this.applicantModel.findOne(
       {
         where: {
@@ -30,6 +31,41 @@ export class JobService {
     );
     if (existingApplicant) {
       throw new CertyError('The job has been applied already'); 
+    }
+    
+    const supportedDocTypes = ['resume', 'coverLetter'];
+    if (files && files.length) {
+      const storage = getStorage();
+      for(const file of files) {
+        const docType = file.fieldname;
+        if (supportedDocTypes.indexOf(docType) < 0) {
+          continue;
+        }
+        const fileUri = this.getJobFileUri(userId, payload.jobId, file.fieldname)
+        const fileRef = storage.bucket().file(fileUri);
+      
+        await new Promise((rs, rj) => {
+          const stream = fileRef.createWriteStream({
+            contentType: file.mimetype,
+          });
+    
+          stream.on('error', (err) => {
+            rj(err);
+          })
+        
+          stream.on('finish', async () => {
+            rs(true);
+          });
+  
+          stream.end(file.buffer);
+        });
+        if (docType === 'resume') {
+          payload.resumeUrl = fileUri;
+        }
+        if (docType === 'coverLetter') {
+          payload.coverLetter = fileUri;
+        }
+      }
     }
 
     const recruiter = await this.userModel.findOne({
@@ -109,5 +145,49 @@ export class JobService {
     });
 
     return applicants.map(u => u.jobId);
+  }
+
+  private getJobFileUri(userId: string | number, jobId: string, fileType: string) {
+    const fileRef = `jobs/${jobId}/${userId}/${fileType}`;
+    return fileRef;
+  }
+
+  async getJobApplicantDocuments(userId, jobId) {
+    const applicant = await this.applicantModel.findOne({
+      where: {
+        applicantId: userId,
+        jobId: jobId,
+      }
+    });
+
+    if (!applicant) {
+      throw new CertyError('Could not found the applicant');
+    }
+
+    const [resume, coverLetter] = await Promise.all([
+      this.getDoc(applicant.resumeUrl),
+      this.getDoc(applicant.coverLetter)
+    ]);
+    const result = {
+      resume,
+      coverLetter
+    };
+
+    return result;
+  }
+
+  private async getDoc(docUri: string): Promise<any> {
+    try {
+      const storage = getStorage();
+      const file = storage.bucket().file(docUri);
+      const [uri] = await file.getSignedUrl({
+        action: 'read',
+        expires: Date.now() + 1000 * 60 * 60
+      });
+      
+      return uri;
+    } catch (e) {
+      return null;
+    }
   }
 }

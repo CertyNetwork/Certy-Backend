@@ -38,7 +38,7 @@ module.exports = {
         allowNull: true,
       },
       description: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: false,
       },
       media: {

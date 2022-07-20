@@ -1,13 +1,16 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { BullModule } from '@nestjs/bull';
 import Redis from 'ioredis';
 import { QueueService } from './queue.service';
 import RedisConfig from '../../config/redis.config';
 import CommonConfig from '../../config/common.config';
 import { MailProcessor } from './processors/mail.processor';
+import { CertificationModule } from 'modules/certification/certification.module';
+import { CertPullingProcessor } from './processors/cert-pulling.processor';
 
 @Module({
   imports: [
+    CertificationModule,
     BullModule.forRoot({
       prefix: `${RedisConfig.REDIS_PREFIX}{bull}`,
       createClient: (type) => {
@@ -38,10 +41,13 @@ import { MailProcessor } from './processors/mail.processor';
     BullModule.registerQueue(
       {
         name: 'queue-mail',
+      },
+      {
+        name: 'cert-pulling',
       }
     ),
   ],
-  providers: [QueueService, MailProcessor],
+  providers: [QueueService, MailProcessor, CertPullingProcessor],
   exports: [QueueService],
 })
 export class QueueModule {}

@@ -13,6 +13,8 @@ import { OrganizationInfoDto, UserInfoDto } from './dto/user-info.dto';
 import { UserDocument } from 'models/user-documents';
 import { OrganizationProfile } from 'models/organization-profile.model';
 import { UserAboutDto, UserSkillsDto } from './dto/user-about.dto';
+import { UserCertificate } from 'models/user-certificate.model';
+import { UserCertDto } from './dto/user-cert.dto';
 
 @Injectable()
 export class ProfileService {
@@ -30,6 +32,8 @@ export class ProfileService {
     private readonly userDocumentModel: typeof UserDocument,
     @InjectModel(User)
     private readonly userModel: typeof User,
+    @InjectModel(UserCertificate)
+    private readonly userCertificateModel: typeof UserCertificate,
   ) {
 
   }
@@ -45,6 +49,20 @@ export class ProfileService {
     };
   }
 
+  public async getMyUserType(userId) {
+    const userEntity = await this.userModel.findOne({
+      where: { id: userId }
+    });
+    
+    if (!userEntity) {
+      throw new CertyError('Invalid user');
+    }
+
+    return {
+      userType: userEntity.userType
+    }
+  }
+
   public async getMyProfile(userId) {
     const userEntity = await this.userModel.findOne({
       where: { id: userId }
@@ -55,7 +73,7 @@ export class ProfileService {
     }
 
     if (userEntity.userType === 'individual') {
-      const [info, experiences, educations] = await Promise.all([
+      const [info, experiences, educations, certificates] = await Promise.all([
         this.userProfileModel.findOne({
           where: {
             userId: userId
@@ -67,6 +85,11 @@ export class ProfileService {
           }
         }),
         this.userEducationModel.findAll({
+          where: {
+            userId: userId
+          }
+        }),
+        this.userCertificateModel.findAll({
           where: {
             userId: userId
           }
@@ -82,14 +105,17 @@ export class ProfileService {
           githubLink: info.githubLink,
         } : null,
         experiences: experiences.map(ex => ({
+          id: ex.id,
           companyName: ex.companyName,
           title: ex.title,
+          location: ex.location,
           employmentType: ex.employmentType,
           description: ex.description,
           startDate: ex.startDate,
           endDate: ex.endDate,
         })),
         educations: educations.map(ed => ({
+          id: ed.id,
           school: ed.school,
           degree: ed.degree,
           grade: ed.grade,
@@ -98,8 +124,11 @@ export class ProfileService {
           startDate: ed.startDate,
           endDate: ed.endDate,
         })),
-        skills: info.skills ? JSON.parse(info.skills) : [],
-        about: info.about
+        skills: info && info.skills ? JSON.parse(info.skills) : [],
+        about: info? info.about : null,
+        certificates: certificates.map(ct => ({
+          id: ct.certId
+        }))
       }
     }
     
@@ -117,16 +146,23 @@ export class ProfileService {
       }),
     ]);
 
+    const companyImages = await Promise.all(documents.map(doc => this.getDocUri(doc.documentUri)));
+
     return {
       info: info ? {
+        id: info.id,
+        companyName: info.companyName,
         email: info.email,
         location: info.location,
         organizationSize: info.organizationSize,
         organizationType: info.organizationType,
         workingHours: info.workingHours,
       } : null,
-      images: documents.map(doc => doc.documentUri),
-      about: info.about
+      images: documents.map((doc, idx) => ({
+        id: doc.id,
+        src: companyImages[idx]
+      })),
+      about: info?.about
     }
   }
 
@@ -305,6 +341,7 @@ export class ProfileService {
       infoEntity = await this.organizationProfileModel.create({
         userId: userId,
         email: infoDto.email,
+        companyName: infoDto.companyName,
         location: infoDto.location,
         organizationType: infoDto.organizationType,
         workingHours: infoDto.workingHours,
@@ -423,18 +460,44 @@ export class ProfileService {
 
   public async getAvatarImage(userId: string): Promise<any> {
     try {
+      const uri = await this.getDocUri(`profiles/${userId}`);
+      
+      return {
+        src: uri
+      }
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  public async getBgImage(userId: string): Promise<any> {
+    try {
+      const uri = await this.getDocUri(`bgImages/${userId}`);
+      
+      return {
+        src: uri
+      }
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  private async getDocUri(uri: string): Promise<any> {
+    try {
       const storage = getStorage();
-      const file = storage.bucket().file(`profiles/${userId}`);
-      const [avatarUri] = await file.getSignedUrl({
+      const file = storage.bucket().file(uri);
+      const [fileExist] = await file.exists();
+      if (!fileExist) {
+        return '';
+      }
+      const [docUri] = await file.getSignedUrl({
         action: 'read',
         expires: Date.now() + 1000 * 60 * 60
       });
       
-      return {
-        avatarUri: avatarUri
-      }
+      return docUri;
     } catch (e) {
-      throw e;
+      return '';
     }
   }
 
@@ -465,7 +528,41 @@ export class ProfileService {
       });
       
       return {
-        avatarUri: avatarUri
+        src: avatarUri
+      }
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  public async uploadBgImage(userId: string, image: Express.Multer.File): Promise<any> {
+    try {
+      const storage = getStorage();
+      const file = storage.bucket().file(`bgImages/${userId}`);
+      
+      await new Promise((rs, rj) => {
+        const stream = file.createWriteStream({
+          contentType: image.mimetype,
+        });
+  
+        stream.on('error', (err) => {
+          rj(err);
+        })
+      
+        stream.on('finish', async () => {
+          rs(true);
+        });
+
+        stream.end(image.buffer);
+      });
+
+      const [uri] = await file.getSignedUrl({
+        action: 'read',
+        expires: Date.now() + 1000 * 60 * 60
+      });
+      
+      return {
+        src: uri
       }
     } catch (e) {
       throw e;
@@ -476,6 +573,19 @@ export class ProfileService {
     try {
       const storage = getStorage();
       const file = storage.bucket().file(`profiles/${userId}`);
+      await file.delete();
+      return {
+        status: 'OK'
+      };
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  public async removeBgImage(userId: string): Promise<any> {
+    try {
+      const storage = getStorage();
+      const file = storage.bucket().file(`bgImages/${userId}`);
       await file.delete();
       return {
         status: 'OK'
@@ -530,6 +640,56 @@ export class ProfileService {
       }
     } catch (e) {
       throw e;
+    }
+  }
+
+  public async removeDocument(user, docId: string | number) {
+    try {
+      const docEntity = await this.userDocumentModel.findOne({
+        where: {
+          userId: user.userId,
+          id: docId
+        }
+      });
+      if (!docEntity) {
+        throw new CertyError('Could not found document');
+      }
+      const storage = getStorage();
+      const file = storage.bucket().file(docEntity.documentUri);
+
+      await file.delete({
+        ignoreNotFound: true
+      });
+
+      await docEntity.destroy();
+
+      return {
+        status: 'OK'
+      }
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  public async updateCertificates(userId, { certs }: UserCertDto) {
+    // destroy all
+    await this.userCertificateModel.destroy({
+      where: {
+        userId: userId
+      }
+    });
+    // re-add
+    if (certs && certs.length) {
+      await this.userCertificateModel.bulkCreate(certs.map(cert => ({
+        userId: userId,
+        certId: cert,
+      })), {
+        ignoreDuplicates: true
+      });
+    }
+
+    return {
+      status: 'OK'
     }
   }
 

@@ -22,6 +22,15 @@ export class KycController {
     });
   }
 
+  @Get('verification/status')
+  @HttpCode(200)
+  @ApiResponse({ status: 200 })
+  async getVerificationStatus(@Req() req: Request) {
+    const { user } = req;
+    const status = await this.kycService.getVerificationStatus(user.userId);
+    return ResHelper.sendSuccess(status);
+  }
+
   @Post('verification/start')
   @HttpCode(200)
   @ApiResponse({ status: 200 })
@@ -34,7 +43,7 @@ export class KycController {
   @Post('verification/finish')
   @HttpCode(200)
   @ApiResponse({ status: 200 })
-  async Verification(@Req() req: Request, @Body() payload: FinishVerificationDto) {
+  async finishVerification(@Req() req: Request, @Body() payload: FinishVerificationDto) {
     const { user } = req;
     const result = await this.kycService.finishVerification(user.userId, payload.jobId, payload.jobToken);
     return ResHelper.sendSuccess(result);

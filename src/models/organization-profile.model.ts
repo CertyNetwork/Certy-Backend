@@ -26,6 +26,9 @@ export class OrganizationProfile extends Model {
   })
   email: string;
 
+  @Column({ type: DataType.STRING, field: 'company_name'})
+  companyName: string;
+
   @Column({ type: DataType.STRING, field: 'about'})
   about: string;
 

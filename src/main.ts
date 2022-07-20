@@ -2,6 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
+import { urlencoded, json } from 'express';
 import session from 'express-session';
 import { ServiceAccount } from 'firebase-admin';
 import * as admin from 'firebase-admin';
@@ -22,9 +23,9 @@ async function bootstrap() {
   ];
   app.enableCors((req, cb) => {
     const options = {
-      origin: false,
-      preflightContinue: false,
-      credentials: false,
+      origin: true,
+      methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+      credentials: true,
     };
     if (allowCors.indexOf(req.header('Origin')) !== -1) {
       options.origin = true;
@@ -35,7 +36,8 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new TransformResponseInterceptor());
   app.useGlobalFilters(new HttpExceptionFilter());
-  
+  app.use(json({limit: '50mb'}));
+  app.use(urlencoded({limit: '50mb', extended: true}));
   app.use(cookieParser());
   app.use(
     session({

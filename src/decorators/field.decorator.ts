@@ -124,3 +124,18 @@ export function DateField(
 
   return applyDecorators(...decorators);
 }
+
+export function StringArrayField(
+  options: Omit<ApiPropertyOptions, 'type'> & { swagger?: boolean; } = {},
+): PropertyDecorator {
+  const decorators = [
+    IsNotEmpty({ each: true, message: 'validation.NOT_EMPTY' }),
+    IsString({ each: true, message: 'validation.INVALID_STRING' }),
+  ];
+
+  if (options?.swagger !== false) {
+    decorators.push(ApiProperty({ type: String, ...options }));
+  }
+
+  return applyDecorators(...decorators);
+}

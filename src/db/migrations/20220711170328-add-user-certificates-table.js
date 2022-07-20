@@ -2,42 +2,38 @@
 
 module.exports = {
   async up (queryInterface, Sequelize) {
-    await queryInterface.createTable('organization_profiles', {
+    await queryInterface.createTable('user_certificates', {
       user_id: {
         type: Sequelize.INTEGER.UNSIGNED,
-        autoIncrement: false,
-        unique: true,
         primaryKey: true,
       },
-      company_name: {
+      cert_id: {
         type: Sequelize.STRING,
-        allowNull: true,
-        unique: true,
+        primaryKey: true,
       },
-      email: {
+      owner_id: {
         type: Sequelize.STRING,
-        allowNull: true,
-        unique: true,
+        allowNull: false,
       },
-      about: {
+      title: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      media: {
+        type: Sequelize.STRING,
+        allowNull: false,
+      },
+      issued_at: {
+        type: Sequelize.BIGINT,
+        allowNull: false,
+      },
+      metadata: {
         type: Sequelize.TEXT,
-        allowNull: true,
-      },
-      location: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      organization_type: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      working_hours: {
-        type: Sequelize.STRING,
-        allowNull: true,
-      },
-      organization_size: {
-        type: Sequelize.STRING,
-        allowNull: true,
+        allowNull: false,
       },
       created_at: {
         type: Sequelize.BIGINT,
@@ -51,6 +47,6 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
-    await queryInterface.dropTable('organization_profiles');
+    await queryInterface.dropTable('user_certificates');
   }
 };

@@ -16,10 +16,11 @@ export class KycService {
 
   }
 
-  async getVerificationStatus(userId: number) {
+  async getVerificationStatus(userId: number, provider: string = 'vouched-id') {
     const verificationJobs = await this.userVerificationModel.findAll({
       where: {
         userId: userId,
+        provider,
       }
     });
     let kycStatus = 'not_started';
@@ -33,8 +34,11 @@ export class KycService {
       kycStatus = 'failed';
     }
 
+    const pendingJob = verificationJobs.find(jb => jb.status === 'pending');
+
     return {
       kycStatus,
+      ...(pendingJob ? { session: pendingJob.token } : null)
     }
   }
 

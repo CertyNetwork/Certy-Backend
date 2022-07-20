@@ -9,13 +9,17 @@ import { UserProfile } from '../../models/user-profile.model';
 import { User } from '../../models/user.model';
 import { UserDocument } from '../../models/user-documents';
 import { OrganizationProfile } from '../../models/organization-profile.model';
+import { UserCertificate } from 'models/user-certificate.model';
 
 @Module({
   controllers: [ProfileController],
   providers: [ProfileService],
   imports: [
     CqrsModule,
-    SequelizeModule.forFeature([User, UserExperience, UserEducation, UserProfile, OrganizationProfile, UserDocument]),
+    SequelizeModule.forFeature([
+      User, UserExperience, UserEducation, UserCertificate,
+      UserProfile, OrganizationProfile, UserDocument
+    ]),
   ],
   exports: [ProfileService],
 })

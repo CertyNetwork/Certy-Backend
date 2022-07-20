@@ -1,11 +1,13 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+import { Cron, CronExpression, Interval } from '@nestjs/schedule';
 import { InjectModel } from '@nestjs/sequelize';
 import { lastValueFrom } from 'rxjs';
+import vouchedConfig from 'config/vouched.config';
 import { UserProfile } from 'models/user-profile.model';
 import { UserVerification } from 'models/user-verification.model';
-import vouchedConfig from 'config/vouched.config';
+import { User } from 'models/user.model';
+import { QueueService } from '../queue-management/queue.service';
 
 @Injectable()
 export class TasksService {
@@ -16,12 +18,15 @@ export class TasksService {
     private readonly userVerificationModel: typeof UserVerification,
     @InjectModel(UserVerification)
     private readonly userProfileModel: typeof UserProfile,
-    private http: HttpService
+    @InjectModel(User)
+    private readonly userModel: typeof User,
+    private http: HttpService,
+    private queueSystemService: QueueService,
   ) {
     
   }
 
-  @Cron(CronExpression.EVERY_11_HOURS)
+  @Cron(CronExpression.EVERY_10_HOURS)
   async handleCron() {
     const completedJobs = await this.userVerificationModel.findAll({
       where: {
@@ -56,4 +61,18 @@ export class TasksService {
       }
     }
   }
+
+  // @Cron(CronExpression.EVERY_30_MINUTES)
+  // async handleInterval() {
+  //   const allUsers = await this.userModel.findAll({
+  //     attributes: ['id', 'address'],
+  //     raw: true,
+  //   });
+  //   if (!allUsers || !allUsers.length) {
+  //     return;
+  //   }
+  //   for (const user of allUsers) {
+  //     await this.queueSystemService.pullingCert(user);
+  //   }
+  // }
 }

@@ -7,20 +7,20 @@ export class UserExperienceDto {
   @IsOptional()
   id: number;
   
-  @StringField({ swagger: true })
+  @StringField({ swagger: true, name: 'company' })
   company: string;
 
-  @StringField({ swagger: true })
+  @StringField({ swagger: true, name: 'title' })
   title: string;
 
-  @StringField({ swagger: true })
+  @StringField({ swagger: true, name: 'location' })
   location: string;
 
-  @StringField({ swagger: true, required: false })
+  @StringField({ swagger: true, required: false, name: 'industry' })
   @IsOptional()
   industry: string;
 
-  @StringField({ swagger: true, required: false })
+  @StringField({ swagger: true, required: false, name: 'employmentType' })
   @IsOptional()
   employmentType?: 'full-time' | 'part-time' | 'self-employed' | 'free-lance' | 'internship' | 'contract';
 
@@ -31,6 +31,6 @@ export class UserExperienceDto {
   @DateField({ swagger: true })
   endDate: Date;
 
-  @StringField({ swagger: true })
+  @StringField({ swagger: true, name: 'description' })
   description: string;
 }

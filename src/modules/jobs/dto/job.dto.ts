@@ -1,3 +1,4 @@
+import { IsOptional } from 'class-validator';
 import { StringField } from '../../../decorators';
 
 export class ApplyJobDto {
@@ -13,11 +14,13 @@ export class ApplyJobDto {
   @StringField({ swagger: true })
   contactNumber: string;
 
-  @StringField({ swagger: true })
-  resumeUrl: string;
+  @StringField({ swagger: false, required: false })
+  @IsOptional()
+  resumeUrl?: string;
 
-  @StringField({ swagger: true })
-  coverLetter: string;
+  @StringField({ swagger: false, required: false })
+  @IsOptional()
+  coverLetter?: string;
 }
 
 export class UpdateApplicantStatusDto {
@@ -26,5 +29,10 @@ export class UpdateApplicantStatusDto {
 
   @StringField({ swagger: true })
   status: 'un_reviewed' | 'reviewed';
+}
+
+export class GetJobApplicantDocumentDto {
+  @StringField({ swagger: true })
+  jobId: string;
 }
 

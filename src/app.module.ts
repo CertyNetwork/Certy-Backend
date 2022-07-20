@@ -15,10 +15,13 @@ import { UserModule } from './modules/user/user.module';
 import { Web3StorageModule } from './modules/web3.storage/web3.storage.module';
 import { WebhookModule } from './modules/webhook/webhook.module';
 import { ProfileModule } from './modules/profile/profile.module';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CertificationModule } from 'modules/certification/certification.module';
 
 const APP_MODULES = [
+  ScheduleModule.forRoot(),
   AuthModule, UserModule, KycModule, Web3StorageModule,
-  QueueModule, WebhookModule, CronjobModule, JobModule,
+  QueueModule, WebhookModule, CronjobModule, JobModule, CertificationModule,
   ProfileModule
 ];
 

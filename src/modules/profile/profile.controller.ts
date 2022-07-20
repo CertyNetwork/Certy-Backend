@@ -11,6 +11,8 @@ import { OrganizationInfoDto, UserInfoDto } from './dto/user-info.dto';
 import { UserTypeDto } from './dto/user-type.dto';
 import { UploadDocumentDto } from './dto/upload-document.dto';
 import { UserAboutDto, UserSkillsDto } from './dto/user-about.dto';
+import { UserCertDto } from './dto/user-cert.dto';
+import { CertyError } from 'errors/certy.error';
 
 @ApiBearerAuth()
 @ApiController('profile')
@@ -18,6 +20,17 @@ export class ProfileController {
   constructor(
     private profileService: ProfileService
   ) {}
+
+  @Get('/type')
+  @HttpCode(200)
+  @ApiResponse({ status: 200 })
+  async getMyUserType(@Req() req: Request) {
+    const { user } = req;
+    const result = await this.profileService.getMyUserType(user.userId);
+    return ResHelper.sendSuccess({
+      ...result
+    });
+  }
 
   @Get('/me')
   @HttpCode(200)
@@ -107,6 +120,16 @@ export class ProfileController {
     });
   }
 
+  @Get('/avatar/:accountId')
+  @HttpCode(200)
+  @ApiResponse({ status: 200 })
+  async getPublicAvatar(@Param('accountId') accountId: string) {
+    const result = await this.profileService.getAvatarImage(accountId);
+    return ResHelper.sendSuccess({
+      ...result
+    });
+  }
+
   @Get('/me/avatar')
   @HttpCode(200)
   @ApiResponse({ status: 200 })
@@ -122,7 +145,24 @@ export class ProfileController {
   @HttpCode(200)
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 200 })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: {
+      files: 1,
+      fileSize: 10485760, // 10MB
+    },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+        cb(null, true);
+      } else {
+        cb(
+          new CertyError(
+            'The image format is not valid only jpg, png are accepted',
+          ),
+          false,
+        );
+      }
+    },
+  }))
   async uploadAvatar(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
     if (!file) {
       return ResHelper.sendFail('Invalid operation');
@@ -145,17 +185,100 @@ export class ProfileController {
     });
   }
 
+  @Get('/me/bg-image')
+  @HttpCode(200)
+  @ApiResponse({ status: 200 })
+  async getBgImage(@Req() req: Request) {
+    const { user } = req;
+    const result = await this.profileService.getBgImage(user.accountId);
+    return ResHelper.sendSuccess({
+      ...result
+    });
+  }
+  
+  @Post('/me/bg-image')
+  @HttpCode(200)
+  @ApiConsumes('multipart/form-data')
+  @ApiResponse({ status: 200 })
+  @UseInterceptors(FileInterceptor('file', {
+    limits: {
+      files: 1,
+      fileSize: 10485760, // 10MB
+    },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+        cb(null, true);
+      } else {
+        cb(
+          new CertyError(
+            'The image format is not valid only jpg, png are accepted',
+          ),
+          false,
+        );
+      }
+    },
+  }))
+  async uploadBgImage(@UploadedFile() file: Express.Multer.File, @Req() req: Request) {
+    if (!file) {
+      return ResHelper.sendFail('Invalid operation');
+    }
+    const { user } = req;
+    const result = await this.profileService.uploadBgImage(user.accountId, file)
+    return ResHelper.sendSuccess({
+      ...result
+    });
+  }
+
+  @Delete('/me/bg-image')
+  @HttpCode(200)
+  @ApiResponse({ status: 200 })
+  async deleteBgImage(@Req() req: Request) {
+    const { user } = req;
+    const result = await this.profileService.removeBgImage(user.accountId);
+    return ResHelper.sendSuccess({
+      ...result
+    });
+  }
+
   @Post('/me/organization-images')
   @HttpCode(200)
   @ApiConsumes('multipart/form-data')
   @ApiResponse({ status: 200 })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file', {
+    limits: {
+      files: 1,
+      fileSize: 10485760, // 10MB
+    },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+        cb(null, true);
+      } else {
+        cb(
+          new CertyError(
+            'The image format is not valid only jpg, png are accepted',
+          ),
+          false,
+        );
+      }
+    },
+  }))
   async upload(@UploadedFile() file: Express.Multer.File, @Req() req: Request, @Body() payload: UploadDocumentDto) {
     if (!file) {
       return ResHelper.sendFail('Invalid operation');
     }
     const { user } = req;
     const result = await this.profileService.uploadDocument(user, 'organization-images', file, payload)
+    return ResHelper.sendSuccess({
+      ...result
+    });
+  }
+
+  @Delete('/me/organization-images/:docId')
+  @HttpCode(200)
+  @ApiResponse({ status: 200 })
+  async removeCompanyImage(@Req() req: Request, @Param('docId') docId: string | number) {
+    const { user } = req;
+    const result = await this.profileService.removeDocument(user, docId);
     return ResHelper.sendSuccess({
       ...result
     });
@@ -168,6 +291,17 @@ export class ProfileController {
     const profile = await this.profileService.getPublicProfile(userId);
     return ResHelper.sendSuccess({
       profile
+    });
+  }
+
+  @Post('/me/certificates')
+  @HttpCode(200)
+  @ApiResponse({ status: 200 })
+  async updateCertificates(@Req() req: Request, @Body() payload: UserCertDto) {
+    const { user } = req;
+    const result = await this.profileService.updateCertificates(user.userId, payload);
+    return ResHelper.sendSuccess({
+      ...result
     });
   }
 }

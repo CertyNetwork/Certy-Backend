@@ -15,7 +15,7 @@ module.exports = {
         unique: true,
       },
       about: {
-        type: Sequelize.STRING,
+        type: Sequelize.TEXT,
         allowNull: true,
       },
       skills: {

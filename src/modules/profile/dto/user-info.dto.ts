@@ -1,4 +1,4 @@
-import { IsEmail, IsOptional, IsUrl } from 'class-validator';
+import { IsEmail, IsOptional, IsUrl, ValidateIf } from 'class-validator';
 import { StringField } from '../../../decorators';
 
 export class UserInfoDto {
@@ -18,17 +18,21 @@ export class UserInfoDto {
   bio?: string;
 
   @StringField({ swagger: true, required: false })
-  @IsUrl()
   @IsOptional()
+  @IsUrl()
+  @ValidateIf((object, value) => !!value)
   linkedinLink?: string;
 
   @StringField({ swagger: true, required: false })
-  @IsUrl()
   @IsOptional()
+  @IsUrl()
+  @ValidateIf((object, value) => !!value)
   githubLink?: string;
 }
 
 export class OrganizationInfoDto {
+  @StringField({ swagger: true })
+  companyName: string;
 
   @StringField({ swagger: true })
   @IsEmail()

@@ -17,7 +17,6 @@ export class Web3StorageService {
   }
 
   async putFiles(userId: number, files: Array<Express.Multer.File>, metaData?: any): Promise<any> {
-    // const uploadFiles = await getFilesFromPath(files.map(fl => fl.path));
     const uploadFiles = files.map(file => ({
         name: file.originalname,
         stream: () => ReadStream.from(file.buffer)
@@ -43,7 +42,8 @@ export class Web3StorageService {
     }
 
     return {
-      rootCid: rootCid.toString()
+      rootCid: rootCid.toString(),
+      files: await this.client.get(rootCid),
     };
   }
 

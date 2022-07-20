@@ -1,4 +1,4 @@
-import { StringField } from '../../../decorators';
+import { StringArrayField, StringField } from '../../../decorators';
 
 export class UserAboutDto {
   @StringField({ swagger: true })
@@ -6,6 +6,6 @@ export class UserAboutDto {
 }
 
 export class UserSkillsDto {
-  @StringField({ swagger: true })
+  @StringArrayField({ swagger: true })
   skills: string[];
 }
