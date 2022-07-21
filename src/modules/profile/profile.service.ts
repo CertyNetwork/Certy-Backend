@@ -96,6 +96,7 @@ export class ProfileService {
         })
       ]);
       return {
+        userType: userEntity.userType,
         info: info ? {
           email: info.email,
           displayName: info.displayName,
@@ -149,6 +150,7 @@ export class ProfileService {
     const companyImages = await Promise.all(documents.map(doc => this.getDocUri(doc.documentUri)));
 
     return {
+      userType: userEntity.userType,
       info: info ? {
         id: info.id,
         companyName: info.companyName,
@@ -370,6 +372,7 @@ export class ProfileService {
         organizationSize: infoDto.organizationSize
       });
     } else {
+      infoEntity.companyName = infoDto.companyName;
       infoEntity.email = infoDto.email;
       infoEntity.location = infoDto.location;
       infoEntity.organizationType = infoDto.organizationType;
