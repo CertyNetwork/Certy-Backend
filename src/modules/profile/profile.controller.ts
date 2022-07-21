@@ -13,6 +13,7 @@ import { UploadDocumentDto } from './dto/upload-document.dto';
 import { UserAboutDto, UserSkillsDto } from './dto/user-about.dto';
 import { UserCertDto } from './dto/user-cert.dto';
 import { CertyError } from 'errors/certy.error';
+import { Public } from 'decorators/public.decorator';
 
 @ApiBearerAuth()
 @ApiController('profile')
@@ -121,10 +122,22 @@ export class ProfileController {
   }
 
   @Get('/avatar/:accountId')
+  @Public()
   @HttpCode(200)
   @ApiResponse({ status: 200 })
   async getPublicAvatar(@Param('accountId') accountId: string) {
     const result = await this.profileService.getAvatarImage(accountId);
+    return ResHelper.sendSuccess({
+      ...result
+    });
+  }
+
+  @Get('/bg/:accountId')
+  @Public()
+  @HttpCode(200)
+  @ApiResponse({ status: 200 })
+  async getPublicBg(@Param('accountId') accountId: string) {
+    const result = await this.profileService.getBgImage(accountId);
     return ResHelper.sendSuccess({
       ...result
     });
@@ -284,13 +297,14 @@ export class ProfileController {
     });
   }
 
-  @Get('/:userId/public')
+  @Get('/public/:userId')
+  @Public()
   @HttpCode(200)
   @ApiResponse({ status: 200 })
   async getPublicProfile(@Param('userId') userId: string) {
     const profile = await this.profileService.getPublicProfile(userId);
     return ResHelper.sendSuccess({
-      profile
+      ...profile
     });
   }
 

@@ -23,18 +23,18 @@ export class StorageController {
       fileSize: 10485760, // 10MB
       files: 10,
     },
-    fileFilter: (req, file, cb) => {
-      if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
-        cb(null, true);
-      } else {
-        cb(
-          new CertyError(
-            'The image format is not valid only jpg, png are accepted',
-          ),
-          false,
-        );
-      }
-    },
+    // fileFilter: (req, file, cb) => {
+    //   if (file.mimetype.match(/\/(jpg|jpeg|png)$/)) {
+    //     cb(null, true);
+    //   } else {
+    //     cb(
+    //       new CertyError(
+    //         'The image format is not valid only jpg, png are accepted',
+    //       ),
+    //       false,
+    //     );
+    //   }
+    // },
   }))
   async putMany(@UploadedFiles() files: Array<Express.Multer.File>, @Req() req: Request, @Body() metadata) {
     if (!files || !files.length) {

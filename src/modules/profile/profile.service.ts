@@ -166,9 +166,9 @@ export class ProfileService {
     }
   }
 
-  public async getPublicProfile(userId) {
+  public async getPublicProfile(accountId: string) {
     const userEntity = await this.userModel.findOne({
-      where: { id: userId }
+      where: { address: accountId }
     });
 
     if (!userEntity) {
@@ -176,75 +176,97 @@ export class ProfileService {
     }
 
     if (userEntity.userType === 'individual') {
-      const [info, experiences, educations] = await Promise.all([
+      const [info, experiences, educations, certificates] = await Promise.all([
         this.userProfileModel.findOne({
           where: {
-            userId: userId
+            userId: userEntity.id
           }
         }),
         this.userExperienceModel.findAll({
           where: {
-            userId: userId
+            userId: userEntity.id
           }
         }),
         this.userEducationModel.findAll({
           where: {
-            userId: userId
+            userId: userEntity.id
+          }
+        }),
+        this.userCertificateModel.findAll({
+          where: {
+            userId: userEntity.id
           }
         })
       ]);
       return {
-        info: {
-          displayName: info.displayName,
-          location: info.location,
-          linkedInLink: info.linkedInLink,
-          githubLink: info.githubLink,
-        },
-        experiences: experiences.map(ex => ({
-          companyName: ex.companyName,
-          title: ex.title,
-          employmentType: ex.employmentType,
-          description: ex.description,
-          startDate: ex.startDate,
-          endDate: ex.endDate,
-        })),
-        educations: educations.map(ed => ({
-          school: ed.school,
-          degree: ed.degree,
-          grade: ed.grade,
-          fieldOfStudy: ed.fieldOfStudy,
-          description: ed.description,
-          startDate: ed.startDate,
-          endDate: ed.endDate,
-        })),
-        skills: info.skills ? JSON.parse(info.skills) : [],
-        about: info.about
-      }
+        userType: userEntity.userType,
+        profile: {
+          info: {
+            displayName: info?.displayName,
+            location: info?.location,
+            linkedInLink: info?.linkedInLink,
+            githubLink: info?.githubLink,
+          },
+          experiences: experiences.map(ex => ({
+            companyName: ex.companyName,
+            title: ex.title,
+            employmentType: ex.employmentType,
+            description: ex.description,
+            startDate: ex.startDate,
+            endDate: ex.endDate,
+          })),
+          educations: educations.map(ed => ({
+            school: ed.school,
+            degree: ed.degree,
+            grade: ed.grade,
+            fieldOfStudy: ed.fieldOfStudy,
+            description: ed.description,
+            startDate: ed.startDate,
+            endDate: ed.endDate,
+          })),
+          skills: info?.skills ? JSON.parse(info.skills) : [],
+          about: info?.about,
+          certificates: certificates.map(ct => ({
+            id: ct.certId
+          }))
+        }
+      };
     }
     
     const [info, documents] = await Promise.all([
       this.organizationProfileModel.findOne({
         where: {
-          userId: userId
+          userId: userEntity.id
         }
       }),
       this.userDocumentModel.findAll({
         where: {
-          userId: userId,
+          userId: userEntity.id,
           documentType: 'organization-images'
         }
       }),
     ]);
 
+    const companyImages = await Promise.all(documents.map(doc => this.getDocUri(doc.documentUri)));
+
     return {
-      info: {
-        location: info.location,
-        organizationSize: info.organizationSize,
-        organizationType: info.organizationType,
-        workingHours: info.workingHours,
-      },
-      images: documents.map(doc => doc.documentUri),
-      about: info.about
+      userType: userEntity.userType,
+      profile: {
+        info: info ? {
+          id: info.id,
+          companyName: info.companyName,
+          email: info.email,
+          location: info.location,
+          organizationSize: info.organizationSize,
+          organizationType: info.organizationType,
+          workingHours: info.workingHours,
+        } : null,
+        images: documents.map((doc, idx) => ({
+          id: doc.id,
+          src: companyImages[idx]
+        })),
+        about: info?.about
+      }
     }
   }
 
