@@ -114,6 +114,22 @@ export class JobService {
     return users.map(u => u.address);
   }
 
+  async getAllCandidates (userId: number) {
+    const applicants = await this.applicantModel.findAll({
+      where: {
+        recruiterId: userId,
+      }
+    });
+
+    const applicantIds = applicants.map(a => a.applicantId);
+    const users = await this.userModel.findAll({
+      where: {
+        id: { [Op.in]: applicantIds }
+      }
+    });
+    return users.map(u => u.address);
+  }
+
   async updateApplicantStatus(userId: number, jobId: string, payload: UpdateApplicantStatusDto) {
     const applicant = await this.applicantModel.findOne({
       where: {

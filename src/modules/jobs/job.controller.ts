@@ -36,6 +36,15 @@ export class JobController {
     return ResHelper.sendSuccess(candidates);
   }
 
+  @Get('/candidates')
+  @HttpCode(200)
+  @ApiResponse({ status: 200 })
+  async getAllApplicants(@Req() req: Request) {
+    const { user } = req;
+    const candidates = await this.jobService.getAllCandidates(user.userId);
+    return ResHelper.sendSuccess(candidates);
+  }
+
   @Post(':jobId/update-applicant-status')
   @HttpCode(200)
   @ApiResponse({ status: 200 })
